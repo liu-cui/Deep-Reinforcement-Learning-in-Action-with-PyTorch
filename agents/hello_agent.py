@@ -9,6 +9,7 @@ import random
 import numpy as np
 import pandas as pd
 import time
+import matplotlib.pyplot as plt
 
 np.random.seed(2)  # reproducible
 
@@ -26,7 +27,6 @@ def build_q_table(n_states, actions):
         np.zeros((n_states, len(actions))),  # q table init
         columns=actions   # actions name
     )
-    logging.info(table)
     return table
 
 
@@ -60,26 +60,22 @@ def update_env(S, episode, step_counter):
     env_list = ["-"] * (N_STATES - 1) + ["T"]
     if S == "terminal":
         interation = "Episode %s: total steps = %s" % (episode + 1, step_counter)
-        # print("\r{}".format(interation), end="")
-        logging.info(interation)
-        time.sleep(2)
-        # print("\r                      ", end="")
-        logging.info("")
+        time.sleep(0.5)
     else:
         env_list[S] = "o"
         interaction = "".join(env_list)
-        # print("\r{}".format(interaction, end=""))
-        logging.info(interaction)
         time.sleep(FRESH_TIME)
-
 
 def run_hello_agent():
     q_table = build_q_table(N_STATES, ACTIONS)
+    x = []
+    y= []
     for episode in range(MAX_EPISODES):
         step_counter = 0
         S = 0
         is_terminated = False
         update_env(S, episode, step_counter)
+        total_reward = 0
         while not is_terminated:
             A = choose_action(S, q_table)
             S_, R = get_env_feedback(S, A)  # take action and get next state and reward
@@ -93,7 +89,10 @@ def run_hello_agent():
             S = S_  # move to next state
             update_env(S, episode, step_counter + 1)
             step_counter += 1
-    logging.info(q_table)
+            total_reward += q_target
+        x.append(episode+1)
+        y.append(total_reward)
+        logging.info(f"episode = {episode + 1},steps = {step_counter}, reward = {total_reward}")
     return q_table
 
 
