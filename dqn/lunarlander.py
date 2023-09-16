@@ -12,9 +12,12 @@ import torch.nn.functional as F
 import logging
 import warnings
 
+torch.manual_seed(1)    # reproducible
+
 
 warnings.filterwarnings('ignore')
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s')
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s')
 
 
 env_name = "LunarLander-v2"
