@@ -9,8 +9,11 @@ import random
 import numpy as np
 import pandas as pd
 import time
+import matplotlib
 import matplotlib.pyplot as plt
 
+
+matplotlib.style.use("ggplot")
 np.random.seed(2)  # reproducible
 
 N_STATES = 6  # the length of the 1 dimensional world
@@ -18,7 +21,7 @@ ACTIONS = ["left", "right"]  # available actions
 EPSILON = 0.9  # greedy policy
 ALPHA = 0.1  # learning rate
 GAMMA = 0.9  # discount factor
-MAX_EPISODES = 13  # maximum episodes
+MAX_EPISODES = 50  # maximum episodes
 FRESH_TIME = 0.3   # fresh time for one move
 
 
@@ -68,14 +71,15 @@ def update_env(S, episode, step_counter):
 
 def run_hello_agent():
     q_table = build_q_table(N_STATES, ACTIONS)
-    x = []
-    y= []
+    episodes = []
+    rewards = []
     for episode in range(MAX_EPISODES):
         step_counter = 0
         S = 0
         is_terminated = False
         update_env(S, episode, step_counter)
         total_reward = 0
+
         while not is_terminated:
             A = choose_action(S, q_table)
             S_, R = get_env_feedback(S, A)  # take action and get next state and reward
@@ -90,14 +94,18 @@ def run_hello_agent():
             update_env(S, episode, step_counter + 1)
             step_counter += 1
             total_reward += q_target
-        x.append(episode+1)
-        y.append(total_reward)
-        logging.info(f"episode = {episode + 1},steps = {step_counter}, reward = {total_reward}")
+        episodes.append(episode+1)
+        rewards.append(total_reward)
+        logging.info(f"episode = {episode + 1}, steps = {step_counter}, reward = {total_reward}")
+    plt.plot(episodes, rewards)
+    # plt.show()
+    plt.savefig("../agents/images/treasure.png")
     return q_table
 
 
 if __name__ == '__main__':
     logging.info(f"hello world, start train your agent!")
-    q_table = run_hello_agent()
+    run_hello_agent()
+
 
 

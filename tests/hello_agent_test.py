@@ -4,9 +4,10 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append("/agents/")
 sys.path.append("/common/")
+sys.path.append("/images/")
 
 # 导入自定义模块
-from agents.hello_agent import run_hello_agent
+from agents.treasure import run_hello_agent
 
 
 if __name__ == '__main__':
