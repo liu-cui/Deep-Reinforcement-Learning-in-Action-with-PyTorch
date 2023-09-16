@@ -9,7 +9,12 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
-from common.log import logging
+import logging
+import warnings
+
+
+warnings.filterwarnings('ignore')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s')
 
 
 env_name = "LunarLander-v2"
@@ -185,7 +190,7 @@ def optimize_model():
 if torch.cuda.is_available():
     num_episodes = 600
 else:
-    num_episodes = 50
+    num_episodes = 5
 for i_episode in range(num_episodes):
     # Initialize the environment and get it's state
     state, info = env.reset()
