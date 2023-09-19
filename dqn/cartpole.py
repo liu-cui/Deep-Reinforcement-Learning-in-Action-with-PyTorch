@@ -1,4 +1,4 @@
-import gymnasium as gym
+import gym
 import math
 import random
 import matplotlib
@@ -11,18 +11,17 @@ import torch.optim as optim
 import torch.nn.functional as F
 import logging
 import warnings
+from matplotlib import animation
 
-torch.manual_seed(1)    # reproducible
-
+torch.manual_seed(1)  # reproducible
 
 warnings.filterwarnings('ignore')
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s')
 
-
 env_name = "CartPole-v1"
 
-env = gym.make(env_name, render_mode="human")
+env = gym.make(env_name)
 
 # set up matplotlib
 is_ipython = 'inline' in matplotlib.get_backend()
@@ -87,7 +86,7 @@ LR = 1e-4
 # Get number of actions from gym action space
 n_actions = env.action_space.n
 # Get the number of state observations
-state, info = env.reset()
+state = env.reset()
 n_observations = len(state)
 
 policy_net = DQN(n_observations, n_actions).to(device)
@@ -156,7 +155,8 @@ def optimize_model():
 
     # Compute a mask of non-final states and concatenate the batch elements
     # (a final state would've been the one after which simulation ended)
-    non_final_mask = torch.tensor(tuple(map(lambda s: s is not None, batch.next_state)), device=device, dtype=torch.bool)
+    non_final_mask = torch.tensor(tuple(map(lambda s: s is not None, batch.next_state)), device=device,
+                                  dtype=torch.bool)
     non_final_next_states = torch.cat([s for s in batch.next_state if s is not None])
     state_batch = torch.cat(batch.state)
     action_batch = torch.cat(batch.action)
@@ -190,18 +190,40 @@ def optimize_model():
     optimizer.step()
 
 
+def show_state(env, step=0, info=""):
+    plt.figure(3)
+    plt.clf()
+    plt.imshow(env.render(mode='rgb_array'))
+    plt.title("Step: %d %s" % (step, info))
+    plt.axis('off')
+
+
+
+def display_frames_as_gif(frames, SavePath):
+    patch = plt.imshow(frames[0])
+    plt.axis('off')
+
+    def animate(i):
+        patch.set_data(frames[i])
+
+    anim = animation.FuncAnimation(plt.gcf(), animate, frames=len(frames), interval=50)
+    anim.save(SavePath, writer='ffmpeg', fps=30)
+
+
 if torch.cuda.is_available():
     num_episodes = 600
 else:
     num_episodes = 500
 for i_episode in range(num_episodes):
     # Initialize the environment and get it's state
-    state, info = env.reset()
+    state = env.reset()
     state = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0)
     total_reward = 0
+    frames = []
     for t in count():
+        frames.append(env.render("rgb_array"))  # 加载各个时刻图像到帧
         action = select_action(state)
-        observation, reward, terminated, truncated, _ = env.step(action.item())
+        observation, reward, terminated, truncated = env.step(action.item())
         reward = torch.tensor([reward], device=device)
         done = terminated or truncated
 
@@ -226,16 +248,18 @@ for i_episode in range(num_episodes):
         for key in policy_net_state_dict:
             target_net_state_dict[key] = policy_net_state_dict[key] * TAU + target_net_state_dict[key] * (1 - TAU)
         target_net.load_state_dict(target_net_state_dict)
-        if reward == 1:
-            total_reward += reward[0]
+
+        total_reward += reward[0]
+        if total_reward >= 475:
+            display_frames_as_gif(frames, SavePath=f'gifs/episode{i_episode}_{env_name}_return{int(total_reward)}.gif')  # 保存运行结果动图
         if done:
             # episode_durations.append(t + 1)
             episode_durations.append(total_reward)
-            plot_durations()
+            # plot_durations()
             break
     logging.info(f"episode: {i_episode + 1}, return: {total_reward}")
 
 logging.info(f"Complete {env_name}")
-plot_durations(show_result=True)
+# plot_durations(show_result=True)
 plt.ioff()
-plt.show()
+plt.show()  # 展示最终
