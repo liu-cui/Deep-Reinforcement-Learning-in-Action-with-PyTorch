@@ -78,3 +78,4 @@ tensorboard --logdir=/Users/cuiliu/Desktop/workspace/Deep-Reinforcement-Learning
 - [Action-Conditional Video Prediction using Deep Networks in Atari Games]( https://arxiv.org/pdf/1507.08750v2.pdf) : JunhyukOh, et al 2015
 - [Control of Memory, Active Perception, and Action in Minecraft]( https://web.eecs.umich.edu/~baveja/Papers/ICML2016.pdf) : JunhyukOh, et al 2015
 
+## Reference
